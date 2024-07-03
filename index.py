@@ -1,10 +1,7 @@
 from flask import Flask
-from dotenv import load_dotenv, find_dotenv
-from connectors.mysql_connector import connection
-
-from sqlalchemy.orm import sessionmaker
-
-from controllers.users import users_routes
+from dotenv import load_dotenv
+from controllers.users import users_routes, s
+from controllers.accounts import accounts_routes
 
 from flask_login import LoginManager
 from models.users import Users
@@ -17,14 +14,15 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 app.register_blueprint(users_routes)
+app.register_blueprint(accounts_routes)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    Session = sessionmaker(connection)
-    s = Session()
+    # Session = sessionmaker(connection)
+    # s = Session()
     return s.query(Users).get(int(user_id))
 
 @app.route("/")

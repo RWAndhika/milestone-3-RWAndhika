@@ -3,7 +3,7 @@ from connectors.mysql_connector import connection
 from models.users import Users
 
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import select, func
+from sqlalchemy import func
 
 from flask_login import login_user, logout_user, login_required, current_user
 
@@ -27,7 +27,7 @@ def register_user():
         s.commit()
     except Exception as e:
         print(e)
-        s.rollback
+        s.rollback()
         return {'message': 'Fail to register'}, 500
     
     return {'message': 'Register user success'}, 200
@@ -56,7 +56,7 @@ def user_login():
         }, 200
     
     except Exception as e:
-        s.rollback
+        s.rollback()
         return {'message': 'Fail to login'}, 500
     
 @users_routes.route('/users/me', methods=['GET'])
@@ -64,9 +64,10 @@ def user_login():
 def info_user():
     try:
         return {
-        'username': current_user.username,
-        'email': current_user.email
-        }
+            'id': current_user.id,
+            'username': current_user.username,
+            'email': current_user.email
+        }, 200
     except Exception as e:
         print(e)
         return {'message': 'Unauthorized'}, 401
@@ -101,7 +102,7 @@ def update_user():
     
     return {'message': 'Update user info success'}, 200
 
-@users_routes.route('/users/delete', methods=['DELETE'])
+@users_routes.route('/users/me', methods=['DELETE'])
 @login_required
 def delete_user():
     # Session = sessionmaker(connection)
