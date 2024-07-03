@@ -9,12 +9,16 @@ from flask_login import login_user, logout_user, login_required, current_user
 
 users_routes = Blueprint('users_routes', __name__)
 
+Session = sessionmaker(connection)
+s = Session()
+# s.begin()
+
 @users_routes.route('/users', methods=['POST'])
 def register_user():
-    Session = sessionmaker(connection)
-    s = Session()
+    # Session = sessionmaker(connection)
+    # s = Session()
 
-    s.begin()
+    # s.begin()
     try:
         NewUser = Users(username = request.form['username'], email = request.form['email'])
         NewUser.set_password(request.form['password_hash'])
@@ -30,10 +34,10 @@ def register_user():
     
 @users_routes.route('/users/login', methods=['POST'])
 def user_login():
-    Session = sessionmaker(connection)
-    s = Session()
+    # Session = sessionmaker(connection)
+    # s = Session()
 
-    s.begin()
+    # s.begin()
     try:
         email = request.form['email']
         user = s.query(Users).filter(Users.email == email).first()
@@ -73,10 +77,10 @@ def update_user():
 
     flag = False
 
-    Session = sessionmaker(connection)
-    s = Session()
+    # Session = sessionmaker(connection)
+    # s = Session()
 
-    s.begin()
+    # s.begin()
     try:
         user = s.query(Users).filter(Users.id == current_user.id).first()
 
@@ -88,7 +92,7 @@ def update_user():
             flag = True
         if flag:
             user.updated_at = func.now()
-            s.add(user)
+            # s.add(user)
             s.commit()
     
     except Exception as e:
@@ -100,10 +104,10 @@ def update_user():
 @users_routes.route('/users/delete', methods=['DELETE'])
 @login_required
 def delete_user():
-    Session = sessionmaker(connection)
-    s = Session()
+    # Session = sessionmaker(connection)
+    # s = Session()
     
-    s.begin()
+    # s.begin()
     try:
         user = s.query(Users).filter(Users.id == current_user.id).first()
         s.delete(user)
