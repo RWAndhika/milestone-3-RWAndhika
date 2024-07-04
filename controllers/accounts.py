@@ -2,6 +2,8 @@ from flask import Blueprint, request
 from models.accounts import Accounts
 from controllers.users import s
 
+import uuid
+
 from sqlalchemy import func
 
 from flask_login import login_required, current_user
@@ -30,7 +32,7 @@ def get_accounts():
         return {'accounts': accounts}, 200
     
     except Exception as e:
-        return {'message': 'Unexcpected error'}, 500
+        return {'message': 'Unexpected error'}, 500
     
 @accounts_routes.route('/accounts/<id>', methods=['GET'])
 @login_required
@@ -53,17 +55,21 @@ def get_account(id):
             }, 200
     
     except Exception as e:
-        return {'message': 'Unexcpected error'}, 500
+        return {'message': 'Unexpected error'}, 500
     
 @accounts_routes.route('/accounts', methods=['POST'])
 @login_required
 def register_account():
     try:
+        allowed_type = ['deposit', 'withdrawal', 'transfer']
+        type = request.form['account_type']
+        if type not in allowed_type:
+            return {'message': 'Invalid account type (checkings or savings)'}, 400
         NewAccount = Accounts(
-            user_id = current_user.id,
-            account_type =  request.form['account_type'],
-            account_number = request.form['account_number'],
-            balance = request.form['balance']
+            user_id=current_user.id,
+            account_type=type,
+            account_number=str(uuid.uuid4()),
+            balance=request.form['balance']
         )
 
         s.add(NewAccount)
@@ -71,7 +77,7 @@ def register_account():
     
     except Exception as e:
         s.rollback()
-        return {'message': 'Unexcpected error'}, 500
+        return {'message': 'Unexpected error'}, 500
     
     return {'message': 'Create a new account success'}, 200
 
@@ -86,9 +92,6 @@ def update_account(id):
             return {'message': 'Unauthorized'}
         if 'account_type' in request.form:
             account.account_type = request.form['account_type']
-            flag = True
-        if 'account_number' in request.form:
-            account.account_number = request.form['account_number']
             flag = True
         if 'balance' in request.form:        
             account.balance = request.form['balance']
