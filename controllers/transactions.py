@@ -91,8 +91,6 @@ def add_transaction():
         
         user_accounts = s.query(Accounts).filter(Accounts.user_id == current_user.id).all()
         user_account_ids = [account.id for account in user_accounts]
-        all_accounts = s.query(Accounts).all()
-        all_account_ids = [account.id for account in all_accounts]
 
         NewTransaction = Transactions(
             type=transaction_type,
@@ -112,8 +110,8 @@ def add_transaction():
 
         elif NewTransaction.type == 'transfer':
             from_account_id = request.form.get('from_account_id', type=int)
-            if from_account_id and from_account_id in all_account_ids:
-                NewTransaction.from_account_id = from_account_id
+            if from_account_id and from_account_id in user_account_ids:
+                NewTransaction.from_account_id = user_account_ids
                 from_account = s.query(Accounts).filter(Accounts.id == from_account_id).first()
                 if from_account.balance - int(NewTransaction.amount) >= 0:
                     from_account.balance -= int(NewTransaction.amount)
@@ -122,16 +120,7 @@ def add_transaction():
                     return {'message': 'Insufficient funds'}, 400
             else:
                 return {'message': 'Invalid from_account_id for transfer'}, 400
-
-            to_account_id = request.form.get('to_account_id', type=int)
-            if to_account_id and to_account_id != from_account_id and to_account_id in all_account_ids:
-                NewTransaction.to_account_id = to_account_id
-                to_account = s.query(Accounts).filter(Accounts.id == to_account_id).first()
-                to_account.balance += int(NewTransaction.amount)
-                to_account.updated_at = func.now()
-            else:
-                return {'message': 'Invalid to_account_id for transfer'}, 400
-
+            
         elif NewTransaction.type == 'withdrawal':
             from_account_id = request.form.get('from_account_id', type=int)
             if from_account_id and from_account_id in user_account_ids:
