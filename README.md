@@ -4,7 +4,7 @@ Hello my name is Raden Wisnu Andhika Pranidhia. This is a project assignment fro
 
 For API documentation, you can click [here](https://documenter.getpostman.com/view/33841449/2sA3dyir9T)
 
-If you have any question or anything else regarding the website, feel free to contact me at [linkedin](https://www.linkedin.com/in/raden-wisnu-andhika-pranidhia-b17a16196/), [email](mailto:radenwisnu21@gmail.com). I am open to any criticism and suggestion. Thank you!
+If you have any question or anything else regarding the project, feel free to contact me at [linkedin](https://www.linkedin.com/in/raden-wisnu-andhika-pranidhia-b17a16196/), [email](mailto:radenwisnu21@gmail.com). I am open to any criticism and suggestion. Thank you!
 
 ## CREATE DATABASE
 
