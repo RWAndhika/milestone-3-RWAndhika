@@ -27,4 +27,4 @@ def load_user(user_id):
 
 @app.route("/")
 def hello_world():
-    return "Hello World!"
+    return "Copy and paste this for api docs: https://documenter.getpostman.com/view/33841449/2sA3dyir9T"
