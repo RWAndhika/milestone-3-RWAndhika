@@ -5,13 +5,14 @@ from controllers.users import s
 
 from sqlalchemy import func, or_, and_
 
-from flask_login import login_required, current_user
+from flask_login import current_user
+from decorators.authorization_checker import auth_required
 
 transactions_routes = Blueprint('transactions_routes', __name__)
 
 
 @transactions_routes.route('/transactions', methods=['GET'])
-@login_required
+@auth_required()
 def get_transactions():
     try:
         accounts = s.query(Accounts).filter(Accounts.user_id == current_user.id).all()
@@ -48,12 +49,12 @@ def get_transactions():
         return {'message': 'Unexpected error'}, 500
     
 @transactions_routes.route('/transactions/<id>', methods=['GET'])
-@login_required
+@auth_required()
 def get_transaction(id):
     try:
         accounts = s.query(Accounts).filter(Accounts.user_id == current_user.id).all()
         account_ids = [account.id for account in accounts]
-        print(account_ids)
+        
         transaction = s.query(Transactions).filter(
             and_(
                 Transactions.id == id,
@@ -81,7 +82,7 @@ def get_transaction(id):
         return {'message': 'Unexpected error'}, 500
 
 @transactions_routes.route('/transactions', methods=['POST'])
-@login_required
+@auth_required()
 def add_transaction():
     try:
         allowed_type = ['deposit', 'withdrawal', 'transfer']
@@ -89,12 +90,16 @@ def add_transaction():
         if transaction_type not in allowed_type:
             return {'message': 'Invalid transaction type (deposit, withdrawal, transfer)'}, 400
         
+        input_amount = int(request.form['amount'])
+        if input_amount < 0:
+            return {'message': 'Invalid amount input (> 0)'}, 400      
+
         user_accounts = s.query(Accounts).filter(Accounts.user_id == current_user.id).all()
         user_account_ids = [account.id for account in user_accounts]
 
         NewTransaction = Transactions(
             type=transaction_type,
-            amount=request.form['amount'],
+            amount=input_amount,
             description=request.form['description']
         )
 
@@ -111,12 +116,13 @@ def add_transaction():
         elif NewTransaction.type == 'transfer':
             from_account_id = request.form.get('from_account_id', type=int)
             if from_account_id and from_account_id in user_account_ids:
-                NewTransaction.from_account_id = user_account_ids
-                from_account = s.query(Accounts).filter(Accounts.id == from_account_id).first()
-                if from_account.balance - int(NewTransaction.amount) >= 0:
-                    from_account.balance -= int(NewTransaction.amount)
-                    from_account.updated_at = func.now()
+                NewTransaction.from_account_id = from_account_id
+                account = s.query(Accounts).filter(Accounts.id == from_account_id).first()
+                if account.balance - int(NewTransaction.amount) >= 0:
+                    account.balance -= int(NewTransaction.amount)
+                    account.updated_at = func.now()
                 else:
+                    s.rollback()
                     return {'message': 'Insufficient funds'}, 400
             else:
                 return {'message': 'Invalid from_account_id for transfer'}, 400
@@ -130,6 +136,7 @@ def add_transaction():
                     account.balance -= int(NewTransaction.amount)
                     account.updated_at = func.now()
                 else:
+                    s.rollback()
                     return {'message': 'Insufficient funds'}, 400
             else:
                 return {'message': 'Invalid from_account_id for withdrawal'}, 400
