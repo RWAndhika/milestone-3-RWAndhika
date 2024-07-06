@@ -93,10 +93,10 @@ def update_account(id):
     allowed_type = ['checkings', 'savings']
     try:
         account = s.query(Accounts).filter(Accounts.id == id).first()
-        current_account_type = account.account_type
-        current_account_balance = account.balance
         if account == None:
             return {'message': "Account not found"}, 404
+        current_account_type = account.account_type
+        current_account_balance = account.balance
         if not account.user_id == current_user.id:
             return {'message': 'Unauthorized'}, 403
         if 'account_type' in request.form:

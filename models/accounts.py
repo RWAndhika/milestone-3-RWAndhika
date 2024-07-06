@@ -15,7 +15,8 @@ class Accounts(Base):
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    transactions_from = relationship('Transactions',
+    transactions_from = relationship(
+        'Transactions',
         foreign_keys='Transactions.from_account_id',
         cascade="all, delete-orphan",
         backref='from_account'
