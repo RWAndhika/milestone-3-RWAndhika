@@ -12,6 +12,7 @@ mysql-connector-python = "*"
 python-dotenv = "*"
 cerberus = "*"
 flask-cors = "*"
+gunicorn = "*"
 
 [dev-packages]
 
