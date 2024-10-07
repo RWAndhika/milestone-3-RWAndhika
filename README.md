@@ -12,7 +12,9 @@ For the Flask API has been deployed on [render.com](https://render.com/) using d
 
 The link to the deployed back-end api can be accessed [here](https://banking-application-rwandhika.onrender.com)
 
-## CREATE DATABASE
+## CREATE DATABASE (FOR LOCAL)
+
+For this project, I use MySQL Workbench to create a local database
 
 ```sql
 CREATE DATABASE milestone_3;
@@ -52,7 +54,7 @@ CREATE TABLE transactions(
 );
 ```
 
-## Clone project
+## Clone project (FOR LOCAL)
 
 change newdirectory to the desired name:
 
@@ -65,10 +67,10 @@ cd newdirectory
 ```
 
 ```bash
-git clone https://github.com/RevoU-FSSE-4/milestone-3-RWAndhika.git
+git clone https://github.com/RWAndhika/milestone-3-RWAndhika.git
 ```
 
-## add .env file to connect to your local database
+## add .env file to connect to your local database (FOR LOCAL)
 
 You can add new file named .env and then place it inside the root of the folder
 
@@ -81,7 +83,30 @@ DB_DATABASE=your_database_name
 SECRET_KEY=your_secret_key
 ```
 
-## Initialize your project
+## change codes to connect to a local database inside /connectors/mysql_connector.py file (FOR LOCAL)
+
+mysql_connector.py
+
+```python
+from sqlalchemy import create_engine
+import os
+
+username = os.getenv("DB_USERNAME")
+password = os.getenv("DB_PASSWORD")
+host = os.getenv("DB_HOST")
+database = os.getenv("DB_DATABASE")
+
+# Connect to Database
+print("Connecting to MySQL Database")
+engine = create_engine(f'mysql+mysqlconnector://{username}:{password}@{host}/{database}')
+
+connection = engine.connect()
+print("Success connecting to MySQL Database")
+```
+
+These will change the back-end from connecting to the deployed database to the local MySQL Database
+
+## Initialize your project (FOR LOCAL)
 
 install package inside the pipenv file:
 
