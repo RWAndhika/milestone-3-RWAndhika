@@ -2,9 +2,15 @@
 
 Hello my name is Raden Wisnu Andhika Pranidhia. This is a project assignment from RevoU about making a secure and intuitive Flask API for a banking application. The API offer various features for account management, user authentication, and transactions.
 
-For API documentation, you can click [here](https://documenter.getpostman.com/view/33841449/2sA3dyir9T)
+For API documentation, you can click [here](https://documenter.getpostman.com/view/33841449/2sA3dyir9T) (Might need to try a few try when first consuming the API because deployed using only free services)
 
 If you have any question or anything else regarding the project, feel free to contact me at [linkedin](https://www.linkedin.com/in/raden-wisnu-andhika-pranidhia-b17a16196/), [email](mailto:radenwisnu21@gmail.com). I am open to any criticism and suggestion. Thank you!
+
+## UPDATE
+
+For the Flask API has been deployed on [render.com](https://render.com/) using database deployed on [filess.io](https://filess.io/) to make it easier to try and access.
+
+The link to the deployed back-end api can be accessed [here](https://banking-application-rwandhika.onrender.com)
 
 ## CREATE DATABASE
 
