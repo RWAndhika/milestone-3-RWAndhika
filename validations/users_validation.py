@@ -7,6 +7,14 @@ users_register_schema = {
     }
 }
 
+users_login_schema = {
+    'email': {
+        'type': 'string',
+        'regex': '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$',
+        'required': True
+    }
+}
+
 users_update_schema = {
     'username': {'type': 'string', 'minlength': 2},
     'email': { 

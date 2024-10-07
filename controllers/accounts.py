@@ -9,6 +9,9 @@ from sqlalchemy import func
 from flask_login import current_user
 from decorators.authorization_checker import auth_required
 
+from cerberus import Validator
+from validations.accounts_validation import accounts_register_schema, accounts_update_schema
+
 accounts_routes = Blueprint('accounts_routes', __name__)
 
 @accounts_routes.route('/accounts', methods=['GET'])
@@ -61,8 +64,18 @@ def get_account(id):
 @accounts_routes.route('/accounts', methods=['POST'])
 @auth_required()
 def register_account():
+    allowed_type = ['checkings', 'savings']
+
+    v = Validator(accounts_register_schema)
+    request_body = {
+        'account_type': request.form.get('account_type'),
+        'balance': request.form.get('balance', '', type=int)
+    }
+
+    if not v.validate(request_body):
+        return {'error': v.errors}, 409
+
     try:
-        allowed_type = ['checkings', 'savings']
         type = request.form['account_type']
         account_balance = int(request.form['balance'])
         if type not in allowed_type:
@@ -88,25 +101,41 @@ def register_account():
 @accounts_routes.route('/accounts/<id>', methods=['PUT'])
 @auth_required()
 def update_account(id):
+    v = Validator(accounts_update_schema)
     flag = False
-
+    
     allowed_type = ['checkings', 'savings']
     try:
         account = s.query(Accounts).filter(Accounts.id == id).first()
+
         if account == None:
             return {'message': "Account not found"}, 404
         current_account_type = account.account_type
         current_account_balance = account.balance
+
         if not account.user_id == current_user.id:
             return {'message': 'Unauthorized'}, 403
+        
         if 'account_type' in request.form:
+            request_body = {
+                'account_type': request.form.get('account_type')
+            }
+            if not v.validate(request_body):
+                s.rollback()
+                return {'error': v.errors}, 409
             type = request.form['account_type']
             if type not in allowed_type:
                 s.rollback()
                 return {'message': 'Invalid account type (checkings or savings)'}, 400
             account.account_type = type
             flag = True
-        if 'balance' in request.form:        
+        if 'balance' in request.form:
+            request_body = {
+                'balance': request.form.get('balance', '', type=int)
+            }
+            if not v.validate(request_body):
+                s.rollback()
+                return {'error': v.errors}, 409
             account_balance = int(request.form['balance'])
             if account_balance < 0:
                 s.rollback()

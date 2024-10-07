@@ -3,13 +3,13 @@ from connectors.mysql_connector import connection
 from models.users import Users
 
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from flask_login import login_user, logout_user, current_user
 from decorators.authorization_checker import auth_required
 
 from cerberus import Validator
-from validations.users_validation import users_register_schema, users_update_schema
+from validations.users_validation import users_register_schema, users_login_schema, users_update_schema
 
 users_routes = Blueprint('users_routes', __name__)
 
@@ -29,7 +29,14 @@ def register_user():
         return {'error': v.errors}, 409
 
     try:
-        NewUser = Users(username=request.form['username'], email=request.form['email'])
+        username = request.form['username']
+        email = request.form['email']
+        user = s.query(Users).filter(or_(Users.email == email, Users.username == username)).first()
+
+        if user != None:
+            return {'message': 'email or username already registered'}, 403
+
+        NewUser = Users(username=username, email=email)
         NewUser.set_password(request.form['password'])
 
         s.add(NewUser)
@@ -42,6 +49,15 @@ def register_user():
     
 @users_routes.route('/users/login', methods=['POST'])
 def user_login():
+
+    v = Validator(users_login_schema)
+    request_body = {
+        'email': request.form.get('email')
+    }
+
+    if not v.validate(request_body):
+        return {'error': v.errors}, 409
+
     try:
         email = request.form['email']
         user = s.query(Users).filter(Users.email == email).first()
@@ -82,7 +98,7 @@ def info_user():
 def update_user():
 
     v = Validator(users_update_schema)
-    flag = False
+    flag = False # To check if there is any changes
     current_username = current_user.username
     current_email = current_user.email
 
