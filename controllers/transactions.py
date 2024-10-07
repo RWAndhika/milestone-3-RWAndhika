@@ -115,12 +115,21 @@ def add_transaction():
 
         elif NewTransaction.type == 'transfer':
             from_account_id = request.form.get('from_account_id', type=int)
+            to_account_id = request.form.get('to_account_id', type=int)
             if from_account_id and from_account_id in user_account_ids:
                 NewTransaction.from_account_id = from_account_id
-                account = s.query(Accounts).filter(Accounts.id == from_account_id).first()
-                if account.balance - int(NewTransaction.amount) >= 0:
-                    account.balance -= int(NewTransaction.amount)
-                    account.updated_at = func.now()
+                from_account = s.query(Accounts).filter(Accounts.id == from_account_id).first()
+                if from_account.balance - int(NewTransaction.amount) >= 0:
+                    to_account = s.query(Accounts).filter(Accounts.id == to_account_id).first()
+                    if to_account != None:
+                        NewTransaction.to_account_id = to_account_id
+                        to_account.balance += int(NewTransaction.amount)
+                        to_account.updated_at = func.now()
+                    else:
+                        s.rollback()
+                        return {'message': 'Invalid to_account_id for transfer'}, 400
+                    from_account.balance -= int(NewTransaction.amount)
+                    from_account.updated_at = func.now()
                 else:
                     s.rollback()
                     return {'message': 'Insufficient funds'}, 400
