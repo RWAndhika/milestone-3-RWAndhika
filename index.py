@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from dotenv import load_dotenv
 from controllers.users import users_routes, s
 from controllers.accounts import accounts_routes
@@ -12,6 +13,7 @@ import os
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 app.register_blueprint(users_routes)
